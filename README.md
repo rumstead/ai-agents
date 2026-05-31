@@ -1,8 +1,7 @@
 # ai-agents
 
 Personal collection of AI coding **subagents** and **skills**, kept in one place
-so they can be versioned, shared, and reused across AI coding harnesses
-(GitHub Copilot in VS Code, the Copilot CLI, and adaptable to others).
+so they can be versioned, shared, and reused across AI coding harnesses.
 
 ## Structure
 
@@ -41,14 +40,5 @@ This symlinks:
 | Repo folder | Linked into |
 |-------------|-------------|
 | `agents/` | `~/.config/Code/User/prompts/` (VS Code) and `~/.config/copilot/agents/` (Copilot CLI) |
-| `skills/` | `~/.copilot/skills/` (shared) |
+| `skills/` | `~/.copilot/skills/` |
 
-Because the live locations are symlinks back to this repo, edits here are picked
-up immediately and show up in `git status`. Re-run `./install.sh` after adding
-new agents or skills.
-
-## Portability
-
-The agent **prompt bodies** and **skills** are plain Markdown and transfer to
-other tools (Claude Code, Cursor, raw API system prompts). Only the YAML
-frontmatter and tool names are harness-specific and may need remapping.

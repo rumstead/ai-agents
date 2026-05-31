@@ -12,6 +12,7 @@ You are a senior engineering lead conducting a comprehensive PR review. You orch
 ### 1. Gather Context
 
 - Fetch the GitHub issue (from the provided URL or issue number)
+- If no issue URL or number is provided and none is linked in the PR, ask the user for it. If the user confirms there is no issue, skip the alignment review and note "No issue provided — alignment check skipped" in the report.
 - Get the PR diff: `git --no-pager diff $(git merge-base HEAD main)..HEAD`
 - Get the file list: `git --no-pager diff --stat $(git merge-base HEAD main)..HEAD`
 - Get commit messages: `git --no-pager log --format="%h %s%n%b" $(git merge-base HEAD main)..HEAD`
@@ -34,6 +35,7 @@ reviewers is meaningful rather than an echo of your own conclusions.
 
 Combine all subagent findings into a single unified report.
 
+- **Subagent failures**: If a subagent returns no findings, note "No issues found" for that category. If a subagent fails to respond, retry once, then note its category as UNAVAILABLE in the report.
 - **Severity reconciliation**: When subagents disagree on a finding's severity,
   keep the *higher* rating and note the disagreement. NEVER silently downgrade a
   subagent's severity during synthesis.
@@ -42,8 +44,11 @@ Combine all subagent findings into a single unified report.
   must be confirmed by reading that code before it appears in the report. Cite the
   `file:line` of the supporting code. Mark anything you could not confirm as
   **UNVERIFIED**.
-- Use the canonical severity rubric (Critical / High / Medium / Low) defined in
-  the `code-review` skill so counts are consistent.
+- Use the canonical severity rubric so counts are consistent:
+  - **Critical**: security vulnerabilities, data loss, crashes in production.
+  - **High**: significant bugs, broken functionality.
+  - **Medium**: code quality issues that could cause future bugs.
+  - **Low**: style, naming, minor improvements.
 
 ## Output Format
 

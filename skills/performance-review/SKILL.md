@@ -25,6 +25,8 @@ Determine which changed code runs:
 
 Focus review effort proportional to execution frequency.
 
+If the code changes have no meaningful performance implications (e.g., documentation, config, or trivial logic), report Risk Level ✅ Low Risk with a brief note that no performance-relevant changes were found.
+
 ### 2. Algorithmic Complexity
 
 For each hot path, assess:
@@ -57,6 +59,8 @@ For each hot path, assess:
 | **Lock granularity** | Contention | Single lock protecting unrelated data |
 | **Channel/queue sizing** | Backpressure | Unbuffered channels causing goroutine leaks |
 | **Context propagation** | Zombie operations | Missing cancellation propagation |
+
+Adapt concurrency and resource management advice to the language of the code under review. The examples above use Go idioms but equivalent patterns exist in other languages.
 
 ### 5. Resource Management
 

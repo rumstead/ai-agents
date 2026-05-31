@@ -27,6 +27,8 @@ Before reviewing, sample the existing codebase to understand:
 
 Use surrounding files in the same package/module as the style reference.
 
+If insufficient surrounding code exists to establish conventions, fall back to the language community's standard style guide (e.g., PEP 8 for Python, Effective Go) and note that conventions were inferred from community standards rather than codebase samples.
+
 ### 2. Language Idioms Check
 
 Evaluate against language-specific best practices:
@@ -72,8 +74,7 @@ Assess how the changes integrate:
 
 ### 6. Severity Rubric
 
-Use the canonical shared rubric (identical to `code-review` and the pr-review
-orchestrator) so severities are comparable across reviewers:
+Use the following severity rubric:
 
 - **Critical**: Will cause bugs, data loss, or security vulnerabilities in production
 - **High**: Significant performance/correctness risk or major design flaw

@@ -16,6 +16,8 @@ user-invocable: false
 
 ### 1. Extract Issue Requirements
 
+If no issue is linked, state that alignment analysis cannot be performed. If the issue lacks clear requirements, extract implicit requirements from the title and description, and note that the issue has no explicit acceptance criteria.
+
 From the GitHub issue, extract:
 - **Title and description**: The core ask
 - **Acceptance criteria**: Explicit checkboxes or listed requirements
@@ -45,7 +47,7 @@ Check for:
 | **Missing requirements** | Issue requirements with no corresponding code changes |
 | **Partial implementations** | Requirements only partially addressed (e.g., happy path but no error handling) |
 | **Scope creep** | Changes that go beyond the issue scope without justification |
-| **Implicit requirements** | Obvious needs not stated (e.g., issue says "add endpoint" but no tests) |
+| **Implicit requirements** | Test coverage for new/changed behavior, error handling for new code paths, documentation updates for user-facing changes |
 | **Regression risk** | Changes that might break existing behavior mentioned in the issue |
 
 ### 4. Output Format
