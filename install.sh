@@ -5,9 +5,10 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 VSCODE_PROMPTS="$HOME/.config/Code/User/prompts"
 CLI_AGENTS="$HOME/.config/copilot/agents"
+DEFAULT_AGENTS="$HOME/.copilot/agents"
 SKILLS_DIR="$HOME/.copilot/skills"
 
-mkdir -p "$VSCODE_PROMPTS" "$CLI_AGENTS" "$SKILLS_DIR"
+mkdir -p "$VSCODE_PROMPTS" "$CLI_AGENTS" "$DEFAULT_AGENTS" "$SKILLS_DIR"
 
 link() { ln -sfn "$1" "$2/$(basename "$1")"; }
 
@@ -16,6 +17,7 @@ for f in "$REPO_DIR"/agents/*.agent.md; do
   [ -e "$f" ] || continue
   link "$f" "$VSCODE_PROMPTS"
   link "$f" "$CLI_AGENTS"
+  link "$f" "$DEFAULT_AGENTS"
 done
 
 # Skills -> shared skills dir
