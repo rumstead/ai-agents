@@ -11,10 +11,10 @@ You are a senior engineering lead conducting a comprehensive PR review. You orch
 
 ### 1. Gather Context
 
-- Use `mcp_github_mcp_se_pull_request_read` to fetch the PR details and diff
-- Use `mcp_github_mcp_se_issue_read` to fetch the linked GitHub issue (from the provided URL or issue number)
+- Use `github/pull_request_read` to fetch the PR details and diff
+- Use `github/issue_read` to fetch the linked GitHub issue (from the provided URL or issue number)
 - If no issue URL or number is provided and none is linked in the PR, ask the user for it. If the user confirms there is no issue, skip the alignment review and note "No issue provided — alignment check skipped" in the report.
-- Use `mcp_github_mcp_se_list_commits` to get commit messages for the PR branch
+- Use `github/list_commits` to get commit messages for the PR branch
 
 **Fallback (if MCP tools are unavailable or fail):**
 - Get the PR diff: `git --no-pager diff $(git merge-base HEAD main)..HEAD`
