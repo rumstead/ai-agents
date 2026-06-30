@@ -1,6 +1,6 @@
 ---
 description: "Verify PR changes align with GitHub issue requirements. Use when: checking if a PR addresses all acceptance criteria, detecting missing deliverables or scope creep."
-tools: [read, search, web, execute]
+tools: [read, search, web, execute, "github/*"]
 user-invocable: false
 ---
 
