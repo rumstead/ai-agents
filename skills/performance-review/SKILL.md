@@ -25,6 +25,15 @@ Determine which changed code runs:
 
 Focus review effort proportional to execution frequency.
 
+You cannot judge execution frequency from the diff alone — it depends on who calls the changed code and how often. Before assigning a hot-path classification or a severity, trace the call sites:
+
+- **Find the callers**: search the codebase (e.g., `grep`/`Grep` for the symbol name) for every site that invokes a changed function or instantiates a changed type. Read those call sites.
+- **Follow the chain up to a known frequency**: walk callers outward until you reach a context whose frequency is observable — a request handler, a loop body, a cron/worker tick, a one-time startup path. A trivial-looking function called inside a per-item loop in a hot handler is a per-item hot path; the same function called once at startup is not.
+- **Check concurrency context**: determine whether callers invoke the changed code concurrently (multiple goroutines/threads/requests), since shared-state and locking findings depend on it.
+- **For shared resources** (caches, pools, buffers): trace all readers and writers, not just the changed site, to assess contention and lifecycle.
+
+If call sites cannot be located (e.g., a public API with external callers), state the frequency assumption you are using explicitly and proceed, as described in Step 6.
+
 If the code changes have no meaningful performance implications (e.g., documentation, config, or trivial logic), report Risk Level ✅ Low Risk with a brief note that no performance-relevant changes were found.
 
 ### 2. Algorithmic Complexity
