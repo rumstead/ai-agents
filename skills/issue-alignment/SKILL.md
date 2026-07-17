@@ -54,10 +54,12 @@ Check for:
 | **Scope creep** | Changes that go beyond the issue scope without justification |
 | **Implicit requirements** | Test coverage for new/changed behavior, error handling for new code paths, documentation updates for user-facing changes |
 | **Regression risk** | Changes that might break existing behavior mentioned in the issue |
+| **Root cause coverage** | Does the change fix the mechanism that causes the issue, or only the visible symptom? Trace the flow end-to-end (callers, error propagation, retry/requeue behavior) before deciding |
+| **Sibling code paths** | Code paths that share the issue's root cause but were left unchanged, so the same bug class will recur there |
 
 ### 4. Output Format
 
-Scope issue severity: **High** = missing or wrong behavior that would cause the issue's stated goal to be unmet or a regression; **Medium** = gap that reduces quality or coverage but does not block the goal (e.g., missing tests, missing docs); **Low** = cosmetic or trivially reversible deviation (e.g., unrelated rename).
+Scope issue severity follows the canonical PR-review rubric: **Critical** = security vulnerabilities, data loss, or production crashes; **High** = missing or wrong behavior that would cause the issue's stated goal to be unmet or a regression; **Medium** = gap that reduces quality or coverage but does not block the goal (e.g., missing tests, missing docs, an unaddressed sibling code path with the same root cause); **Low** = cosmetic or trivially reversible deviation (e.g., unrelated rename).
 
 For Evidence, cite the single most authoritative file and line range. If a requirement spans multiple files, list up to three locations separated by commas; if more than three, list the primary implementation file and append "+ N more".
 

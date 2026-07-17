@@ -18,6 +18,8 @@ If the PR contains no performance-relevant code changes, return the report with 
 
 ## Approach
 
+If the orchestrator provides a worktree path with the PR head checked out, read the changed files and surrounding code from that path and anchor all line numbers to it.
+
 0. **Understand how the changed code is called.** You cannot assess execution frequency or concurrency safety from the diff alone — both depend on the callers. For each changed function or type, search the repository for its call sites and follow the call chain outward until you reach a context with an observable frequency (a request handler, a loop body, a worker tick, a one-time startup path). Determine whether callers invoke the code concurrently, and for shared resources (caches, pools, buffers) trace all readers and writers. Use this to ground the hot-path classification and severity in Steps 1–6. If call sites cannot be located (e.g., a public API with external callers), state the frequency assumption you are using explicitly.
 1. Identify hot paths in the changed code (per-request, per-item, continuous, startup)
 2. Analyze algorithmic complexity — nested loops, unbounded operations, linear searches
@@ -41,7 +43,12 @@ Use this exact table format:
 | # | Severity | Category | File | Lines | Issue | Impact | Suggested Fix |
 |---|----------|----------|------|-------|-------|--------|---------------|
 
-Severity: Critical, High, Medium, Low
+Severity (canonical rubric, shared across all PR review agents; the orchestrator's copy wins on any disagreement):
+- Critical: data loss, crashes, or lockups in production (e.g., deadlock, unbounded memory growth under normal load)
+- High: significant bugs or broken functionality (e.g., race condition with observable corruption, N+1 on a hot path)
+- Medium: issues that could cause future bugs or degrade at higher load
+- Low: minor improvements with negligible impact at current scale
+
 Category: Complexity, N+1, Concurrency, Memory, I/O, Resource Leak, Scalability
 
 End with "Scalability Notes" — brief observations about behavior at higher scale.

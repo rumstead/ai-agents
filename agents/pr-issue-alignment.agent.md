@@ -27,9 +27,10 @@ Fetch the issue content via the GitHub API or web.
    1a. If the issue body is empty or contains no sentences that express a deliverable, a constraint, or an acceptance criterion: (i) add a note at the top of the report stating "Issue lacks formal requirements — analysis based on inferred statements only"; (ii) set Verdict Confidence to Low; (iii) proceed using only literal sentences from the title and body as requirement candidates.
    Derive requirements from the issue title, description/body, acceptance criteria, and clarifications found in comments or discussion threads.
 2. Extract all explicitly stated requirements and acceptance criteria.
-3. Get the PR diff (file list and changes). Fetch using the GitHub API endpoint `GET /repos/{owner}/{repo}/pulls/{pull_number}/files`. Fall back to executing `git diff main...HEAD` via the execute tool only if API access is unavailable.
+3. Get the PR diff (file list and changes). Fetch using the GitHub API endpoint `GET /repos/{owner}/{repo}/pulls/{pull_number}/files`. Fall back to executing `git diff main...HEAD` via the execute tool only if API access is unavailable. If the orchestrator provides a worktree path with the PR head checked out, read changed files and surrounding code there and anchor line numbers to it.
 4. Map each change to a requirement
 5. Identify gaps (unaddressed requirements) and scope creep (unrelated changes)
+6. Root-cause check: trace the fix mechanism end-to-end (callers, error propagation, retry/requeue behavior) to confirm the change resolves the issue's underlying cause rather than only the reported symptom. Then search for sibling code paths that share the same root cause; flag any left unaddressed as gaps (Type: Regression Risk). Flag the gap only; do not propose an implementation.
 
 ## Output Format
 
@@ -43,7 +44,12 @@ Use this exact table format:
 | # | Severity | Type | File | Description |
 |---|----------|------|------|-------------|
 
-Severity: Critical, High, Medium, Low
+Severity (canonical rubric, shared across all PR review agents; the orchestrator's copy wins on any disagreement):
+- Critical: security vulnerabilities, data loss, crashes in production
+- High: significant bugs, broken functionality, or the issue's stated goal left unmet
+- Medium: gaps that could cause future bugs or reduce coverage (missing tests, missing docs, an unaddressed sibling code path)
+- Low: cosmetic or trivially reversible deviations
+
 Type: Missing Requirement, Scope Creep, Regression Risk
 
 Place Partial Implementation rows in the Requirements Coverage table with status "Partial" and evidence of what is missing. Do NOT duplicate them in the Scope Issues table. Reserve the Scope Issues table for Scope Creep and Regression Risk findings only.

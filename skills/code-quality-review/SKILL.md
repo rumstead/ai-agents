@@ -91,18 +91,19 @@ Evaluate:
 Assess how the changes integrate:
 - Do they follow existing module boundaries?
 - Are new packages/modules in the right location?
-- Do they use existing utilities or reinvent them?
+- Do they use existing utilities or reinvent them? Search for existing helpers or mechanisms that already provide the behavior; re-implementing one is a finding (Category: Fit).
+- If the change alters the behavior of an existing abstraction, does the logic belong inside that abstraction so every caller and sibling operation benefits, rather than bolted on at a single call site?
 - Is the dependency direction correct (no circular deps)?
 - Does the API surface match existing patterns?
 
 ### 6. Severity Rubric
 
-Use the following severity rubric:
+Use the canonical PR-review severity rubric (shared across all PR review agents; the orchestrator's copy wins on any disagreement):
 
 - **Critical**: Severe design flaw that will directly cause incorrect behavior or a broken abstraction (note: security vulnerabilities and data-loss bugs are out of scope for this review — flag them with a note to consult a security review, but do not assign Critical for them)
-- **High**: Significant correctness risk or major design flaw
-- **Medium**: Code quality issue that increases maintenance burden
-- **Low**: Stylistic or minor improvement suggestion
+- **High**: Significant bugs or broken functionality likely to result from the design
+- **Medium**: Code quality issue that could cause future bugs or increases maintenance burden
+- **Low**: Stylistic or minor improvement suggestion (style, naming, minor improvements)
 
 ### 7. Output Format
 
