@@ -50,8 +50,9 @@ unchanged. Only the agent *frontmatter* is harness-specific:
 `install.sh` handles this: Copilot and Windsurf consume the canonical files via
 symlink, while for Claude Code it **generates** adapted subagents (rewriting the
 `tools` list to Claude Code's PascalCase tool names, dropping Copilot-only keys,
-and using `<name>.md` filenames). The prompt bodies are never modified — Claude
-Code discovers the referenced skills by their `description` at run time.
+and using `<name>.md` filenames). The comprehensive review workflow includes a
+direct skill-based fallback for harnesses without nested delegation, and a
+GitHub CLI fallback for harnesses without GitHub-native tools.
 
 ## Install
 
@@ -63,6 +64,6 @@ This installs into each harness's live locations:
 
 | Harness | Agents | Skills |
 |---------|--------|--------|
-| **GitHub Copilot** | `~/.config/Code/User/prompts/` (VS Code), `~/.config/copilot/agents/` and `~/.copilot/agents/` (CLI) — symlinked | `~/.copilot/skills/` — symlinked |
+| **GitHub Copilot** | `~/Library/Application Support/Code/User/prompts/` on macOS or `~/.config/Code/User/prompts/` elsewhere (VS Code), `~/.config/copilot/agents/` and `~/.copilot/agents/` (CLI) — symlinked | `~/.copilot/skills/` — symlinked |
 | **Windsurf** | `~/.codeium/windsurf/global_workflows/` — symlinked | (delivered as workflows) |
 | **Claude Code** | `~/.claude/agents/` — generated | `~/.claude/skills/` — symlinked |

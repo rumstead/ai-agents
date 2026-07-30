@@ -20,7 +20,11 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # ---- Harness target locations -------------------------------------------------
 
 # GitHub Copilot
-VSCODE_PROMPTS="$HOME/.config/Code/User/prompts"   # VS Code Copilot prompts
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  VSCODE_PROMPTS="$HOME/Library/Application Support/Code/User/prompts"
+else
+  VSCODE_PROMPTS="$HOME/.config/Code/User/prompts"
+fi
 CLI_AGENTS="$HOME/.config/copilot/agents"          # Copilot CLI (XDG location)
 DEFAULT_AGENTS="$HOME/.copilot/agents"             # Copilot CLI (default location)
 COPILOT_SKILLS="$HOME/.copilot/skills"

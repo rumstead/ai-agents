@@ -2,7 +2,7 @@
 description: "Comprehensive PR review against a GitHub issue. Use when: reviewing a pull request, auditing PR changes against an issue, doing a full code review of a PR with issue context."
 tools: [read, search, execute, agent, "github/*"]
 agents: [pr-issue-alignment, pr-code-quality, pr-performance]
-argument-hint: "Provide the GitHub PR URL and issue URL (or issue number)"
+argument-hint: "Provide the GitHub PR URL and any issue URLs or issue numbers"
 ---
 
 You are a senior engineering lead conducting a comprehensive PR review. You orchestrate specialized reviewers to produce a thorough, actionable review.
@@ -11,13 +11,13 @@ You are a senior engineering lead conducting a comprehensive PR review. You orch
 
 ### 1. Gather Context
 
-If the issue URL or number is not provided, ask the user for it before proceeding. If the user confirms there is no linked issue, skip the @pr-issue-alignment subagent and mark the Alignment Verdict as N/A with the note "No linked issue provided."
+Accept one or more issue URLs or numbers. Fetch the PR details before deciding whether alignment applies, then identify every linked issue from the PR metadata (including closing references and the PR body). Combine those with any issues the user explicitly supplied and deduplicate them. If no linked issue can be identified, skip alignment and mark the Alignment Verdict as N/A with the note "No linked issue found."
 
-- Use `github/pull_request_read` to fetch the PR details, diff, and changed-file list
-- Use `github/issue_read` to fetch the linked GitHub issue (from the provided URL or issue number)
-- Use `github/list_commits` to get commit messages for the PR branch
+- When GitHub-native tools are available, use `github/pull_request_read` to fetch the PR details, diff, changed-file list, and linked issues; use `github/issue_read` to fetch each linked issue; and use `github/list_commits` to get the PR commit messages.
 
 **Fallback (if the GitHub tools are unavailable or fail):**
+- Get PR metadata and linked issue references with `gh pr view <PR URL or number> --json title,body,baseRefName,headRefName,files,commits,closingIssuesReferences`.
+- Fetch every linked issue with `gh issue view <issue number> --repo <owner>/<repo> --comments`.
 - Get the PR diff: `git --no-pager diff $(git merge-base HEAD main)..HEAD`
 - Get the file list: `git --no-pager diff --stat $(git merge-base HEAD main)..HEAD`
 - Get commit messages: `git --no-pager log --format="%h %s%n%b" $(git merge-base HEAD main)..HEAD`
@@ -34,15 +34,16 @@ If the diff exceeds the available context window or is truncated, note "DIFF TRU
 
 ### 2. Delegate to Specialists
 
-Give each subagent the diff, the worktree path from Step 1, and the merge-base it needs to read
-surrounding code **and trace call sites itself**. Each reviewer is expected to understand the full context of a change — not just the changed lines, but where the changed code is used, who calls it, how its return values and errors are consumed, and how often it runs — before critiquing it. Instruct each subagent to do this tracing; do not hand them the answers.
+When the current harness supports the named specialist agents, give each subagent the diff, the worktree path from Step 1, and the merge-base it needs to read surrounding code **and trace call sites itself**. Each reviewer is expected to understand the full context of a change — not just the changed lines, but where the changed code is used, who calls it, how its return values and errors are consumed, and how often it runs — before critiquing it. Instruct each subagent to do this tracing; do not hand them the answers.
+
+When nested delegation is unavailable, execute the `issue-alignment`, `code-quality-review`, and `performance-review` skill procedures yourself instead. Keep their evidence and findings separate until synthesis, and perform the same call-site tracing required of a specialist. This direct-review mode is the required fallback for harnesses whose generated agent has no delegation tool.
 
 When writing the delegation prompt for each subagent, do NOT include your own hypotheses, suspected bugs,
 "note the dead code…" hints, or leading yes/no questions — describe only the
 change and the task. Findings must emerge independently so that agreement between
 reviewers is meaningful rather than an echo of your own conclusions. (Note: this restriction applies to delegation context only — during synthesis in Step 3, you are expected to read and verify code yourself before including findings in the report.)
 
-1. **@pr-issue-alignment**: Pass the issue content, the diff, and the worktree path. Ask it to verify all requirements are addressed, that the change resolves the issue's root cause rather than only the reported symptom, and that sibling code paths sharing the same root cause are not left unaddressed.
+1. **@pr-issue-alignment**: Invoke once for each linked issue. Pass that issue's content, the diff, and the worktree path. Ask it to verify all requirements are addressed, that the change resolves the issue's root cause rather than only the reported symptom, and that sibling code paths sharing the same root cause are not left unaddressed.
 2. **@pr-code-quality**: Pass the diff plus the worktree path and merge-base so it can read surrounding code. Ask it to trace how the changed code is called and used, then evaluate idioms, style, design, and fit, including whether an existing helper or abstraction already provides the behavior.
 3. **@pr-performance**: Pass the diff plus the worktree path and merge-base. Ask it to trace the changed code's call sites to establish execution frequency and concurrency context, then identify performance, scalability, and concurrency risks.
 
@@ -93,14 +94,14 @@ Only when the user asks to put the findings on the PR:
 ```markdown
 # PR Review: <PR title or branch name>
 
-**Issue**: #<number> — <title>
+**Issues**: #<number> — <title>; #<number> — <title>
 **Branch**: <branch name>
 **Files Changed**: <count>
 
-## Alignment Verdict: <✅/⚠️/❌> <Fully Aligned / Partially Aligned / Misaligned>
+## Alignment Verdict: <✅/⚠️/❌/N/A> <Fully Aligned / Partially Aligned / Misaligned / N/A>
 <!-- Use ✅ when all stated requirements are addressed; ⚠️ when at least one requirement is partially addressed but not fully implemented; ❌ when one or more requirements are entirely absent from the diff. -->
 
-<Brief summary of alignment findings>
+<Brief summary of the overall alignment result. Include one subsection per linked issue; if no issue is linked, state the N/A reason.>
 
 ## Combined Issues
 

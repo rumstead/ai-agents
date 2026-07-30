@@ -14,10 +14,12 @@ user-invocable: false
 
 ## Procedure
 
+When an orchestrator supplies an issue snapshot, treat that snapshot as authoritative for the review and do not fetch the issue again. When multiple issue snapshots or linked issue references are supplied, assess each one separately and use the lowest verdict as the PR-level result.
+
 ### 1. Extract Issue Requirements
 
 Apply the following decision tree before extraction:
-1. If no issue is linked → output "Alignment analysis cannot be performed: no linked issue found." and stop.
+1. If neither an issue snapshot nor an issue reference is available → output "Alignment analysis cannot be performed: no linked issue found." and stop.
 2. If the issue has no acceptance criteria and no structured requirements → extract implicit requirements from the title and description, and prepend a note in the output: "⚠️ No explicit acceptance criteria found; requirements inferred from title and description."
 3. Otherwise → proceed to extraction below.
 
