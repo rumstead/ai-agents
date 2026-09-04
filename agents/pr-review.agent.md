@@ -86,7 +86,7 @@ Only when the user asks to put the findings on the PR:
 
 1. Create a pending review (`github/pull_request_review_write` with method `create`, no event).
 2. Add one comment per finding with `github/add_comment_to_pending_review`, anchored to the PR diff lines. Findings about unchanged files go in the review body or as a file-level comment on the nearest changed file.
-3. Write comments in the user's voice. Follow `rumstead-tone.instructions.md` from the user prompts folder if it exists; if it does not exist, fall back to your best judgment of the user's tone based on their prior review comments on the PR, the repository, or this session. Never use em dashes.
+3. Write comments in the user's voice. Before drafting any staged comment, you MUST read the tone file directly at its absolute path `{{VSCODE_USER_PROMPTS_FOLDER}}/rumstead-tone.instructions.md` and apply its rules to every comment. This file lives in the user prompts folder, which is OUTSIDE the workspace, so a workspace-scoped `file_search`/glob will NOT find it. NEVER conclude the file is absent because a glob or `file_search` returned nothing; only a failed read of that absolute path counts as absent. Only if reading the absolute path genuinely fails, fall back to your best judgment of the user's tone based on their prior review comments on the PR, the repository, or this session. Never use em dashes.
 4. NEVER submit the pending review. The user edits and submits it themselves.
 
 ## Output Format

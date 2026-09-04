@@ -28,6 +28,7 @@ fi
 CLI_AGENTS="$HOME/.config/copilot/agents"          # Copilot CLI (XDG location)
 DEFAULT_AGENTS="$HOME/.copilot/agents"             # Copilot CLI (default location)
 COPILOT_SKILLS="$HOME/.copilot/skills"
+VSCODE_SERVER_PROMPTS="$HOME/.vscode-server/data/User/prompts"  # VS Code Remote
 
 # Windsurf (Cascade) — workflows live under the Codeium global dir. Windsurf has
 # no native subagent/skill split, so both agents and skills land as workflows.
@@ -39,6 +40,7 @@ CLAUDE_SKILLS="$HOME/.claude/skills"
 
 mkdir -p \
   "$VSCODE_PROMPTS" "$CLI_AGENTS" "$DEFAULT_AGENTS" "$COPILOT_SKILLS" \
+  "$VSCODE_SERVER_PROMPTS" \
   "$WINDSURF_DIR" \
   "$CLAUDE_AGENTS" "$CLAUDE_SKILLS"
 
@@ -113,6 +115,31 @@ to_claude_agent() {
   '
 }
 
+# ---- Frontmatter adapter: skill -> Copilot custom instructions ----------------
+#
+# A skill whose frontmatter carries `applyTo:` is personal *context* (voice,
+# style, standing preferences) rather than a procedure to run on request. Copilot
+# has no on-demand skill discovery, so those are also emitted as an always-on
+# `<name>.instructions.md`. Claude Code needs no equivalent: it discovers the
+# skill by its `description` at run time.
+#
+# Reads SKILL.md on stdin, writes the instructions file on stdout:
+#   - keeps `description:` and `applyTo:`, drops `name:` and `user-invocable:`
+#   - leaves the Markdown body verbatim
+to_copilot_instructions() {
+  awk '
+    BEGIN { in_fm = 0 }
+    NR == 1 && $0 == "---" { in_fm = 1; print; next }
+    in_fm && $0 == "---"   { in_fm = 0; print; next }
+    in_fm {
+      if ($0 ~ /^(name|user-invocable):/) next
+      print
+      next
+    }
+    { print }
+  '
+}
+
 # ---- Agents -------------------------------------------------------------------
 for f in "$REPO_DIR"/agents/*.agent.md; do
   [ -e "$f" ] || continue
@@ -137,11 +164,19 @@ done
 # so we symlink the skill directories into each harness's skills location.
 for d in "$REPO_DIR"/skills/*/; do
   [ -d "$d" ] || continue
-  ln -sfn "${d%/}" "$COPILOT_SKILLS/$(basename "$d")"
-  ln -sfn "${d%/}" "$CLAUDE_SKILLS/$(basename "$d")"
+  name="$(basename "$d")"
+  ln -sfn "${d%/}" "$COPILOT_SKILLS/$name"
+  ln -sfn "${d%/}" "$CLAUDE_SKILLS/$name"
+
+  # Skills marked `applyTo:` double as Copilot always-on custom instructions.
+  if [ -f "${d}SKILL.md" ] && grep -q '^applyTo:' "${d}SKILL.md"; then
+    to_copilot_instructions < "${d}SKILL.md" > "$VSCODE_PROMPTS/$name.instructions.md"
+    to_copilot_instructions < "${d}SKILL.md" > "$VSCODE_SERVER_PROMPTS/$name.instructions.md"
+  fi
 done
 
 echo "Installed agents and skills from $REPO_DIR"
 echo "  Copilot   : $VSCODE_PROMPTS, $CLI_AGENTS, $DEFAULT_AGENTS (+ skills in $COPILOT_SKILLS)"
+echo "  Instrucns : $VSCODE_PROMPTS, $VSCODE_SERVER_PROMPTS (generated from applyTo skills)"
 echo "  Windsurf  : $WINDSURF_DIR"
 echo "  ClaudeCode: $CLAUDE_AGENTS (generated) + skills in $CLAUDE_SKILLS"
