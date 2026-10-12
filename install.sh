@@ -51,8 +51,8 @@ link() { ln -sfn "$1" "$2/$(basename "$1")"; }
 # Reads a *.agent.md file on stdin and writes a Claude Code subagent to stdout:
 #   - ensures a `name:` field (derived from the filename if absent)
 #   - rewrites `tools: [read, search, ...]` to a PascalCase comma string
-#       read->Read, search->Grep+Glob, web->WebFetch+WebSearch, execute->Bash
-#     (the `agent` tool has no Claude Code equivalent and is dropped)
+#       read->Read, search->Grep+Glob, web->WebFetch+WebSearch, execute->Bash,
+#       agent->Agent, github/*->the mcp__github__ tools the PR agents call
 #   - drops Copilot-only frontmatter keys (agents, user-invocable, argument-hint)
 #   - leaves the Markdown body verbatim
 to_claude_agent() {
@@ -66,12 +66,22 @@ to_claude_agent() {
       delete have
       for (i = 1; i <= n; i++) {
         tok = t[i]
+        gsub(/["'\'']/, "", tok)   # tokens may be quoted, e.g. "github/*"
         if (tok == "")        continue
         else if (tok == "read")    add("Read")
         else if (tok == "search")  { add("Grep"); add("Glob") }
         else if (tok == "web")     { add("WebFetch"); add("WebSearch") }
         else if (tok == "execute") add("Bash")
-        # "agent" and anything unknown are intentionally skipped.
+        else if (tok == "agent")   add("Agent")
+        else if (tok ~ /^github/) {
+          # Claude Code needs each MCP tool named; there is no server wildcard.
+          add("mcp__github__pull_request_read")
+          add("mcp__github__issue_read")
+          add("mcp__github__list_commits")
+          add("mcp__github__pull_request_review_write")
+          add("mcp__github__add_comment_to_pending_review")
+        }
+        # Anything unknown is intentionally skipped.
       }
       if (out != "") print "tools: " out
     }

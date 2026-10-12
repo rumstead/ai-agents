@@ -1,6 +1,6 @@
 ---
 name: performance-review
-description: "Identify hidden performance bottlenecks, scalability risks, and concurrency issues in code changes. Use when: reviewing for performance, checking scalability, auditing concurrency safety, evaluating resource usage."
+description: "Identify hidden performance bottlenecks, scalability risks, and concurrency issues in code changes. Use when: reviewing for performance, checking scalability, auditing concurrency safety, evaluating resource usage, or self-reviewing your own performance diff before you commit, amend, or push it, including a branch inherited from a handoff."
 user-invocable: false
 ---
 
@@ -47,6 +47,7 @@ For each hot path, assess:
 | **Linear search** | O(n) where O(1) possible | Scanning arrays when a map/set lookup would work |
 | **String building** | O(n²) allocations | Concatenation in loops vs builder/buffer |
 | **Recursive calls** | Stack overflow | No depth limit, no tail-call optimization |
+| **Hoisted work** | Unconditional cost | Work moved above a loop to run once now runs even when the loop runs zero times. Check the empty-collection path, and assert work done (call counts, with a case that does the work as a positive control), not just output equality: an output-equivalence test cannot see a cost-side regression |
 
 ### 3. I/O and Network
 
