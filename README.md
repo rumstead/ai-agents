@@ -32,7 +32,6 @@ ai-agents/
 | `code-quality-review` | Evaluate code idioms, style, design patterns, and architectural fit |
 | `issue-alignment` | Verify PR changes align with a GitHub issue's requirements |
 | `performance-review` | Find performance bottlenecks, scalability and concurrency risks |
-| `writing-as-rumstead` | My writing voice for anything posted under my name (PR comments, commits, docs) |
 
 ### Mods
 
@@ -59,10 +58,9 @@ standing preferences) rather than a procedure to run on request. Claude Code
 discovers it by `description` at run time like any other skill, but Copilot has no
 on-demand skill discovery, so `install.sh` also generates an always-on
 `<name>.instructions.md` for it in the VS Code prompts directories (local and
-Remote). `writing-as-rumstead` is the only such skill today.
+Remote).
 
-Note that Claude Code will only consult it when the task looks like writing under
-my name. Rules that must apply to *every* reply (no em dashes) belong in
+Claude Code only consults such a skill when the task matches its description. Rules that must apply to *every* reply (no em dashes) belong in
 `~/.claude/CLAUDE.md`, which is loaded into every session.
 
 ## Portability across harnesses
