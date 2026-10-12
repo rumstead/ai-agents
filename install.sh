@@ -7,6 +7,8 @@ set -euo pipefail
 # The canonical source of truth is:
 #   agents/*.agent.md   — agent prompt bodies with Copilot-style frontmatter
 #   skills/*/SKILL.md   — reusable skill procedures
+#   mods/*/             Claude Code plugins of function hooks, listed in
+#                       .claude-plugin/marketplace.json
 #
 # Copilot and Windsurf consume the canonical files directly (via symlink).
 # Claude Code uses a different frontmatter dialect (PascalCase `tools` string,
@@ -185,8 +187,28 @@ for d in "$REPO_DIR"/skills/*/; do
   fi
 done
 
+# ---- Mods ---------------------------------------------------------------------
+# Claude Code only. The repo is a local plugin marketplace, so each mod is
+# installed at user scope and read in place from mods/<name>: an edit there
+# takes effect at the next session start or /reload-plugins. Every step here is
+# safe to rerun, and `marketplace update` picks up a mod newly added to
+# .claude-plugin/marketplace.json.
+MARKETPLACE="$(jq -r .name "$REPO_DIR/.claude-plugin/marketplace.json")"
+MODS=()
+if command -v claude >/dev/null; then
+  claude plugin marketplace add "$REPO_DIR" >/dev/null
+  claude plugin marketplace update "$MARKETPLACE" >/dev/null
+  for name in $(jq -r '.plugins[].name' "$REPO_DIR/.claude-plugin/marketplace.json"); do
+    claude plugin install "$name@$MARKETPLACE" --scope user >/dev/null
+    MODS+=("$name")
+  done
+else
+  echo "claude not found, skipping mods" >&2
+fi
+
 echo "Installed agents and skills from $REPO_DIR"
 echo "  Copilot   : $VSCODE_PROMPTS, $CLI_AGENTS, $DEFAULT_AGENTS (+ skills in $COPILOT_SKILLS)"
 echo "  Instrucns : $VSCODE_PROMPTS, $VSCODE_SERVER_PROMPTS (generated from applyTo skills)"
 echo "  Windsurf  : $WINDSURF_DIR"
 echo "  ClaudeCode: $CLAUDE_AGENTS (generated) + skills in $CLAUDE_SKILLS"
+echo "  Mods      : ${MODS[*]:-none} (user scope, marketplace $MARKETPLACE)"

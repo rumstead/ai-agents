@@ -1,0 +1,9 @@
+{
+  "name": "checkout-guard",
+  "version": "0.1.0",
+  "description": "Warns when another Claude session shares this git checkout and blocks git commands that would move the tree under it",
+  "author": {
+    "name": "rumstead"
+  },
+  "types": "./types/index.d.ts"
+}

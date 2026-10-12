@@ -1,0 +1,24 @@
+{
+  "name": "rumstead-ai-agents",
+  "description": "rumstead's Claude Code mods",
+  "owner": {
+    "name": "rumstead"
+  },
+  "plugins": [
+    {
+      "name": "checkout-guard",
+      "source": "./mods/checkout-guard",
+      "description": "Warns when another Claude session shares this git checkout and blocks git commands that would move the tree under it"
+    },
+    {
+      "name": "pr-session",
+      "source": "./mods/pr-session",
+      "description": "Names a session pr-<repo>-<number> after the first PR it mentions, and adds /handoff and /resume-handoff"
+    },
+    {
+      "name": "session-info",
+      "source": "./mods/session-info",
+      "description": "Shows the git repo and branch, kubectl context, model, and effort at the end of the hint line under the prompt"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "name": "session-info",
+  "version": "0.1.0",
+  "description": "Shows the git repo and branch, kubectl context, model, and effort at the end of the hint line under the prompt",
+  "author": { "name": "rumstead" },
+  "types": "./types/index.d.ts"
+}
